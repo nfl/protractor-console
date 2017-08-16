@@ -49,11 +49,7 @@ module.exports = {
           message: 'Protractor Console: This browser does not appear to support retrieving logs.',
           level: 'warning',
         });
-      })
-      .catch(e => logPrinter({
-        message: e,
-        level: 'severe'
-      }));
+      });
   },
 
   postTest: function() {
@@ -63,26 +59,29 @@ module.exports = {
       return;
     }
 
-    return browser.manage().logs().get('browser')
-      .then(result => {
-        result = result.filter(byLogLevel, config);
+    try {
+      return browser.manage().logs().get('browser')
+        .then(result => {
+          result = result.filter(byLogLevel, config);
 
-        if (result.length === 0) {
-          return;
-        }
+          if (result.length === 0) {
+            return;
+          }
 
-        printHeader.call(config);
+          printHeader.call(config);
 
-        _(result)
-          .chain()
-          .reduce(group, {})
-          .forEach(printLog, config)
-          .value();
-      })
-      .catch(e => logPrinter({
+          _(result)
+            .chain()
+            .reduce(group, {})
+            .forEach(printLog, config)
+            .value();
+        });
+    } catch (e) {
+      logPrinter({
         message: e,
         level: 'severe'
-      }));
+      });
+    }
   }
 };
 
