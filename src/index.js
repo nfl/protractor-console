@@ -41,14 +41,19 @@ module.exports = {
     // Disable the plugin if `browser.manage().logs()` isn't supported by the browser driver.
     // E.g. GeckoDriver currently doesn't support this call and blows up with a stacktrace.
     // https://github.com/SeleniumHQ/selenium/issues/2972
-    browser.manage().logs().get('browser').then(null, () => {
-      this.enabled = false;
+    browser.manage().logs().get('browser')
+      .then(null, () => {
+        this.enabled = false;
 
-      logPrinter({
-        message: 'Protractor Console: This browser does not appear to support retrieving logs.',
-        level: 'warning',
-      });
-    });
+        logPrinter({
+          message: 'Protractor Console: This browser does not appear to support retrieving logs.',
+          level: 'warning',
+        });
+      })
+      .catch(e => logPrinter({
+        message: e,
+        level: 'severe'
+      }));
   },
 
   postTest: function() {
@@ -73,7 +78,11 @@ module.exports = {
           .reduce(group, {})
           .forEach(printLog, config)
           .value();
-      });
+      })
+      .catch(e => logPrinter({
+        message: e,
+        level: 'severe'
+      }));
   }
 };
 
